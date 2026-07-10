@@ -1,39 +1,29 @@
-import { useEffect, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { StatusBar, View, ActivityIndicator } from 'react-native';
-import { useAuthStore } from '@/store/auth.store';
-import { setupCallKeep } from '@/sip/CallKeepBridge';
-import RootNavigator from '@/navigation/RootNavigator';
+import "react-native-gesture-handler";
+import React, { useEffect } from "react";
+import { StatusBar } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import RootNavigator from "./navigation/RootNavigator";
+import { CallKeepBridge } from "./sip/CallKeepBridge";
+import { registerForPush } from "./fcm/messaging";
+import { useAuthStore } from "./store/auth.store";
 
 const qc = new QueryClient();
 
 export default function App() {
-  const hydrate = useAuthStore((s) => s.hydrate);
-  const [ready, setReady] = useState(false);
+  const token = useAuthStore(s => s.token);
 
   useEffect(() => {
-    (async () => {
-      await hydrate();
-      try { await setupCallKeep(); } catch (e) { console.warn('CallKeep setup failed', e); }
-      setReady(true);
-    })();
-  }, [hydrate]);
+    CallKeepBridge.setup().catch(console.warn);
+  }, []);
 
-  if (!ready) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#0b0d12', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator color="#fb0b8c" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (token) registerForPush().catch(console.warn);
+  }, [token]);
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor="#0b0d12" />
-      <QueryClientProvider client={qc}>
-        <RootNavigator />
-      </QueryClientProvider>
-    </SafeAreaProvider>
+    <QueryClientProvider client={qc}>
+      <StatusBar barStyle="light-content" backgroundColor="#0f172a" />
+      <RootNavigator />
+    </QueryClientProvider>
   );
 }

@@ -25,6 +25,8 @@
     "react-native": "0.76.5",
     "react-native-callkeep": "^4.3.16",
     "react-native-config": "^1.5.5",
+    "react-native-device-info": "^14.0.4",
+    "react-native-gesture-handler": "^2.22.0",
     "react-native-incall-manager": "^4.2.0",
     "react-native-keychain": "^9.2.2",
     "react-native-mmkv": "^3.2.0",
@@ -34,6 +36,7 @@
     "react-native-svg": "^15.11.1",
     "react-native-webrtc": "^124.0.5",
     "socket.io-client": "^4.8.3",
+    "uuid": "^11.0.5",
     "zustand": "^5.0.13"
   },
   "devDependencies": {
@@ -43,6 +46,7 @@
     "@react-native/typescript-config": "0.76.5",
     "@types/react": "^19.0.0",
     "@types/react-native": "^0.73.0",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9.17.0",
     "prettier": "^3.4.2",
     "typescript": "5.3.3"
