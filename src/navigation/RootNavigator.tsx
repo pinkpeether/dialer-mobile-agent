@@ -3,6 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useAuthStore } from "../store/auth.store";
+import { useOnboarding } from "../onboarding/store";
+import OnboardingScreen from "../onboarding/OnboardingScreen";
 import LoginScreen from "../screens/LoginScreen";
 import WorkspaceScreen from "../screens/WorkspaceScreen";
 import DialerScreen from "../screens/DialerScreen";
@@ -43,19 +45,21 @@ function AgentTabs() {
 
 function AuthedApp() {
   const incoming = useIncomingCall();
+  const onboarded = useOnboarding(s => s.completed);
   if (incoming) return <IncomingCallScreen />;
   return (
     <View style={{ flex: 1 }}>
       <MiniCallBar />
       <Stack.Navigator
+        initialRouteName={onboarded ? "Agent" : "Onboarding"}
         screenOptions={{
           headerStyle: { backgroundColor: "#0f172a" },
           headerTintColor: "#fff",
         }}
       >
+        <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Agent" component={AgentTabs} options={{ headerShown: false }} />
-        <Stack.Screen name="SipSettings" component={SipSettingsScreen}
-          options={{ title: "SIP Settings" }} />
+        <Stack.Screen name="SipSettings" component={SipSettingsScreen} options={{ title: "SIP Settings" }} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </View>
