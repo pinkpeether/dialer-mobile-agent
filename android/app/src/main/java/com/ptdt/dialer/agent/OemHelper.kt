@@ -9,12 +9,19 @@ import android.provider.Settings
 import com.facebook.react.bridge.*
 
 /**
- * Opens vendor-specific autostart / background-management settings pages.
- * These intents are undocumented and vendor-versioned; each is tried in
- * order and the first that resolves is launched.
+ * Opens vendor-specific autostart / background-management settings pages,
+ * reports device manufacturer info, and manages battery-optimization exemption.
  */
 class OemHelper(private val ctx: ReactApplicationContext) : ReactContextBaseJavaModule(ctx) {
   override fun getName() = "OemHelper"
+
+  private val aggressiveVendors = setOf(
+    "xiaomi", "redmi", "poco",
+    "oppo", "realme", "oneplus",
+    "vivo", "iqoo",
+    "huawei", "honor",
+    "meizu", "letv"
+  )
 
   private val autostartIntents = listOf(
     // Xiaomi / Redmi / Poco
@@ -34,6 +41,27 @@ class OemHelper(private val ctx: ReactApplicationContext) : ReactContextBaseJava
     ComponentName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity"),
     ComponentName("com.meizu.safe", "com.meizu.safe.security.SHOW_APPSEC"),
   )
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun getManufacturer(): String = Build.MANUFACTURER ?: "unknown"
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun isAggressiveOem(): Boolean =
+    aggressiveVendors.contains((Build.MANUFACTURER ?: "").lowercase())
+
+  @ReactMethod
+  fun isBatteryOptimizationIgnored(promise: Promise) {
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val pm = ctx.getSystemService(PowerManager::class.java)
+        promise.resolve(pm?.isIgnoringBatteryOptimizations(ctx.packageName) == true)
+      } else {
+        promise.resolve(true)
+      }
+    } catch (e: Exception) {
+      promise.reject("BATT_OPT_QUERY_FAILED", e)
+    }
+  }
 
   @ReactMethod
   fun openAutostartSettings(promise: Promise) {
